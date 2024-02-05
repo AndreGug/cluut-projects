@@ -1,26 +1,21 @@
 {
-    "tickets": 
-        [
-            { 
-                "name": "Einzelfahrkarte", 
-                "price": 4 
-                
-            }, 
-            { 
-                "name": "Tageskarte (1 Person)", 
-                "price": 15 
-                
-            }, 
-            { 
-                "name": "Tageskarte (Gruppe)", 
-                "price": 25 
-                
-            }, 
-            { 
-                "name": "Monatskarte", 
-                "price": 99 
-                
-            }
-        ], 
-    "accepted_cash": [1, 2, 5, 10, 20, 50] 
+    "tickets": [
+        {
+            "name": "Single Ticket",
+            "price": 4
+        },
+        {
+            "name": "Day Pass (1 Person)",
+            "price": 15
+        },
+        {
+            "name": "Day Pass (Group)",
+            "price": 25
+        },
+        {
+            "name": "Monthly Pass",
+            "price": 99
+        }
+    ],
+    "accepted_cash": [1, 2, 5, 10, 20, 50]
 }

@@ -1,117 +1,72 @@
-# Aufgabe 0: Log Analyse und Apache verstehen
-
-"""
-Ein Apache HTTP Server ist eine weit verbreitete Webserver-Software, die für ihre Stabilität, Skalierbarkeit und Flexibilität bekannt ist.
-Sie ist in der Lage, statische und dynamische Webinhalte bereitzustellen und unterstützt viele Funktionen wie Virtual Hosting, SSL/TLS-Verschlüsselung,
-Authentifizierung und Autorisierung. Der Apache HTTP Server ist Open-Source-Software und kann kostenlos heruntergeladen, angepasst und eingesetzt werden.
-
-Common Log Format (CLF), Combined Log Format (CLFv2)
-
-IP-Adresse des Clients, der die Anfrage gesendet hat
-Datum und die Uhrzeit des Zugriffs
-HTTP-Methode, die vom Client verwendet wurde (z. B. GET, POST)
-angeforderte Ressource (URL, Dateipfad usw.)
-HTTP-Statuscode, der vom Server an den Client zurückgegeben wurde
-Größe der übertragenen Daten
-Referer, der die URL der vorherigen Seite enthält, die den Client zur aktuellen Seite geführt hat (falls verfügbar)
-User-Agent, der Informationen über den verwendeten Browser und Betriebssystem des Clients enthält (falls verfügbar)
-"""
-
-# Aufgabe 1: Apache Logs analysieren
-
-"""
-IP-Adresse des Clients: 83.149.9.216
-Benutzeridentität und Authentifizierungsstatus: "-" "-" (diese Informationen sind normalerweise leer und werden durch einen Bindestrich "-" dargestellt)
-Datum und Uhrzeit des Zugriffs: [17/May/2015:10:05:03 +0000]
-HTTP-Methode, die vom Client verwendet wurde: "GET"
-Angeforderte Ressource (URL, Dateipfad usw.): "/presentations/logstash-monitorama-2013/images/kibana-search.png"
-Verwendete HTTP-Version: "HTTP/1.1"
-HTTP-Statuscode, der vom Server an den Client zurückgegeben wurde: 200 (erfolgreiche Anfrage)
-Größe der übertragenen Daten (in Bytes): 203023
-Referer: "http://semicomplete.com/presentations/logstash-monitorama-2013/" (die URL der vorherigen Seite, die den Client zur aktuellen Seite geführt hat)
-User-Agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36" (Informationen über den verwendeten Browser und Betriebssystem des Clients)
-"""
-
-# Import aller erfoderlichen Klassen und Module
 from collections import Counter
 from log_pdf import PDF
 import seaborn as sns
-import matplotlib.pyplot as plt
 
-# Datei öffnen und alle Zeilen in eine Liste einlesen
-with open("apache_logs", "r") as fh:
-    apache_logs = fh.readlines()
-print(apache_logs[0])
+# Analyzing Apache Logs
+with open("apache_logs", "r") as file:
+    # Read all lines of the log file
+    log_lines = file.readlines()
+print(log_lines[0])
 
-# Aufgabe 2: HTTP Status Code des ersten Log Eintrags
+# HTTP Status Code of the First Log Entry
+first_line = log_lines[0]
+parts = first_line.split()
+# Extract the HTTP Status Code from the first log line
+print(parts[8])
 
-# Speichern der ersten Zeile in einer zusätzlichen Variablen
-first_line = apache_logs[0]
+# Extract all HTTP Status Codes from the log lines
+status_codes = [line.split()[8] for line in log_lines]
+# Count the occurrences of Status Codes 200 and 404
+status_200 = status_codes.count("200")
+status_404 = status_codes.count("404")
 
-# Splitten der Zeile in ihre Einzelteile
-line_parts = first_line.split()
+# Use the Counter class to determine the top 3 most common Status Codes
+counter = Counter(status_codes)
+print(counter.most_common(3))
 
-# Extrahieren des HTTP Status Code
-http_status_code = line_parts[8]
-print(f"HTTP Status Code: {http_status_code}")
-
-"""
-HTTP Status Code: 200 (erfolgreiche Anfrage)
-"""
-
-# Aufgabe 3: HTTP Status Code Analyse
-
-# Extrahieren aller HTTP Status Codes aus den Log-Zeilen
-status_codes = [line.split()[8] for line in apache_logs]
-
-# Zählen des Status Code 200
-status_code_200 = status_codes.count("200")
-print(f"Anzahl des Status Code 200: {status_code_200}")
-
-# Zählen des Status Code 404
-status_code_404 = status_codes.count("404")
-print(f"Anzahl des Status Code 404: {status_code_404}")
-
-# Verwendung der Counter-Klasse, um die Anzahl jedes Status Code zu bestimmen
-status_count = Counter(status_codes)
-
-# Ermittlung der 3 häufigsten HTTP-Status Codes
-top_status_codes = status_count.most_common(3)
-print(f"Die 3 häufigsten HTTP Status Codes: {top_status_codes}")
-    
-# Aufgabe 4: Fehlerbehebung auf dem HTTP Server
-    
-# Filtern der Log-Zeilen nach Statuscode 404
-lines_with_404 = list(filter(lambda line: line.split()[8] == "404", apache_logs))
-
-# Extrahieren der angefragten URL-Paths (Resource Requested)
+# Filter log lines by Status Code 404
+lines_with_404 = list(filter(lambda x: x.split()[8] == "404", log_lines))
+# Extract requested URL paths
 resource_list = [line.split()[6] for line in lines_with_404]
+# Determine the number of different error sources and the top 3 error sources
+print(len(set(resource_list)))
+print(Counter(resource_list).most_common(3))
 
-# Ermitteln der Anzahl verschiedener Fehlerquellen
-error_sources_count = len(set(resource_list))
-print(f"Anzahl verschiedener Fehlerquellen: {error_sources_count}")
+# Set Seaborn theme and context parameters for plot size and font size
+sns.set_theme()
+sns.set_context("paper", rc={"font.size": 4, "axes.titlesize": 10})
 
-# Ermitteln der 3 häufigsten Fehlerquellen
-top_errors = Counter(resource_list).most_common(3)
-print(f"Die 3 häufigsten Fehlerquellen: {top_errors}")
+# Create a histogram for HTTP Status Codes and save the plot as an image
+sns_plot_status = sns.histplot(status_codes)
+sns_plot_status.set_title("Overview of HTTP Status Codes")
+sns_plot_status.set_xlabel("HTTP Status Codes")
+sns_plot_status.set_ylabel("Count")
+sns_plot_status.get_figure().savefig("status_codes.png", bbox_inches="tight")
+sns_plot_status.figure.clf()
 
-# Bonus Aufgabe: Log Report
+# Create a histogram for requested resources with 404 Status Code and save the plot as an image
+sns_plot_resource = sns.histplot(y=resource_list)
+sns_plot_resource.set_title("Overview of Requested Resources with 404 Status Code")
+sns_plot_resource.set_xlabel("Count")
+sns_plot_resource.set_ylabel("Resource Names")
 
-# Erstellen der Histogramme und Speicherung als Plot
-sns.histplot(status_codes)
-plt.savefig("status_codes.png")
-sns.histplot(resource_list)
-plt.savefig("resource_list.png")
+# Adjust the size of the figure for the plot
+sns_plot_resource.get_figure().set_figwidth(8)
+sns_plot_resource.get_figure().set_figheight(11)
 
-# Erstellen der Liste für die Plots
+# Save the plot as an image
+sns_plot_resource.get_figure().savefig("resource_list.png", bbox_inches="tight")
+sns_plot_resource.figure.clf()
+
+# Create a list of plot filenames
 plots = ["status_codes.png", "resource_list.png"]
 
-# Erstellen einer Instanz der PDF-Klasse
+# Create an instance of the PDF class
 log_report = PDF()
 
-# Erstellen einer for-loop für die plots
+# Iterate over the plots and add them to the PDF report
 for plot in plots:
     log_report.print_page(plot)
 
-# Erstellen des PDF Reports
+# Create the PDF report
 log_report.output("LogReport.pdf", "F")
