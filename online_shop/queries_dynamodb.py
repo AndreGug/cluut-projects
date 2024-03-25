@@ -56,6 +56,6 @@ def get_total_orders(product_name):
 
 if __name__ == '__main__':
     # Test the functions
-    print(put_new_order('andre.gug@gmx.net', 'Guggenheimer', 'André', 'Germany', 'plant', 5))
-    print(get_orders_timerange('plant'))
-    print(get_total_orders('plant'))
+    print(put_new_order(<E-Mail>, <lastname>, <firstname>, <country>, <product>, <quantity>))
+    print(get_orders_timerange(<product>))
+    print(get_total_orders(<product>))
